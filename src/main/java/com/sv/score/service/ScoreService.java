@@ -9,6 +9,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,9 @@ import java.util.List;
 
 @Service
 public class ScoreService implements IScoreService {
+
+    @Value("${amazon.api.url}")
+    private String apiUrl;
 
     @Override
     public ResponseDto<WordScoreDto> computeScore(String keyWord) {
@@ -215,9 +219,9 @@ public class ScoreService implements IScoreService {
     private ResponseDto<WordSuggestionsDto> getWordSuggestions(String keyWord) {
 
         keyWord = keyWord.replaceAll(" ", "+");
-        //HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost("https://completion.amazon.com/search/complete?search-alias=aps&client=amazon-search-ui&mkt=1&q=" + keyWord);
+        HttpPost httpPost = new HttpPost(apiUrl + keyWord);
+
         WordSuggestionsDto wordSuggestionsDto = new WordSuggestionsDto();
         try {
 

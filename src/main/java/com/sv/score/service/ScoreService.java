@@ -21,26 +21,31 @@ import java.util.List;
 @Service
 public class ScoreService implements IScoreService {
 
-    Logger logger = LoggerFactory.getLogger(ScoreService.class);
+    private Logger logger = LoggerFactory.getLogger(ScoreService.class);
 
     @Value("${amazon.api.url}")
     private String apiUrl;
 
-    private int numberWordsWithHigherScore = 0;
-    private int numberWordsWithLowerScore = 0;
 
+    /**
+     * 4 possible scenarios : word is not in the first returned structure, word is in top of the first returned structure,
+     * word is in the bottom of the first returned structure , word is in between the top and bottom of the first returned structure
+     *
+     * @param keyWord string
+     * @return responseDto containing the key word ant its score.
+     */
     @Override
     public ResponseDto<WordScoreDto> computeScore(String keyWord) {
 
         List<String> suggestions = getWordSuggestions(keyWord).getData().getSuggestions();
 
         if (!isWordExistsInStructure(keyWord, suggestions)) {
-            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 0L), HttpStatus.OK);
+            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 0), HttpStatus.OK);
         }
 
         if (isWordInTopStructure(keyWord, suggestions)) {
             // if numberWordsWithHigherScore = 0, the result will always be 100 when applying the score formula
-            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 100L), HttpStatus.OK);
+            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 100), HttpStatus.OK);
         }
 
         if (isWordInBottomStructure(keyWord, suggestions)) {
@@ -53,6 +58,13 @@ public class ScoreService implements IScoreService {
 
     }
 
+    /**
+     * calculate the score of a word in the bottom of the first returned structure
+     *
+     * @param keyWord     string
+     * @param suggestions list of strings
+     * @return float
+     */
 
     private float scoreOfWordInBottom(String keyWord, List<String> suggestions) {
 
@@ -80,9 +92,17 @@ public class ScoreService implements IScoreService {
         return calculateScore(0, numberWordsWithHigherScore);
     }
 
-
+    /**
+     * calculate the score of a word that exists the first returned structure, but not in top or bottom
+     *
+     * @param keyWord     string
+     * @param suggestions list of strings
+     * @return float
+     */
     private float scoreOfWordInBetween(String keyWord, List<String> suggestions) {
 
+        int numberWordsWithHigherScore = 0;
+        int numberWordsWithLowerScore = 0;
 
         List<String> highSuggestions = suggestions;
         List<String> lowSuggestions = suggestions;
@@ -134,11 +154,11 @@ public class ScoreService implements IScoreService {
             //get the suggestions of the bottom word
             lowSuggestions = getWordSuggestions(bottomWord).getData().getSuggestions();
 
-            //if the bottom word is not in returned the returned structure, then exit loop
+            //if the bottom word is not in returned structure, then exit loop
             if (!isWordExistsInStructure(bottomWord, lowSuggestions))
                 break;
 
-            //if the bottm word is also the bottm word in the returned structure, then there's no point to continue
+            //if the bottom word is also the bottom word in the returned structure, then there's no point to continue
             if (0 == (findNumberWordsWithLowerScore(bottomWord, lowSuggestions))) {
                 break;
             }

@@ -1,11 +1,22 @@
+
+#### Prerequisites
+* Java 8
+* Docker engine & Docker-compose (optional)
+
+
 #### Build the project
 ```
 mvn clean build
 ```
 
-#### Run the project
+#### Run the project as jar
 ```
 java -jar target/*.jar
+```
+
+#### Run the project as container
+```
+docker-compose up score
 ```
 
 #### Test the API

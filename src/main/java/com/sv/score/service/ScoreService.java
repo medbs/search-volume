@@ -18,36 +18,6 @@ import java.util.List;
 @Service
 public class ScoreService implements IScoreService {
 
-
-    /*@Override
-    public ResponseDto<WordScoreDto> computeScore(String keyWord) {
-        int numberWordsWithHigherScore = 0;
-        int numberWordsWithLowerScore = 0;
-        String topWord = "";
-        String bottomWord = "";
-
-        // while ((numberWordsWithHigherScore + numberWordsWithLowerScore) < 100) {
-
-        List<String> suggestions = getWordSuggestions(keyWord).getData().getSuggestions();
-
-        if (!isWordExistsInStructure(keyWord, suggestions)) {
-            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 0), HttpStatus.OK);
-        }
-
-        numberWordsWithLowerScore = numberWordsWithLowerScore + findNumberWordsWithLowerScore(keyWord, suggestions);
-        numberWordsWithHigherScore = numberWordsWithHigherScore + findNumberWordsWithHigherScore(keyWord, suggestions);
-
-
-        bottomWord = suggestions.get(suggestions.size() - 1);
-        topWord = suggestions.get(0);
-
-        int score = calculateScore(numberWordsWithLowerScore, numberWordsWithHigherScore);
-
-        return new ResponseDto<>(true, "", new WordScoreDto(keyWord, score), HttpStatus.OK);
-
-        //}
-    } */
-
     @Override
     public ResponseDto<WordScoreDto> computeScore(String keyWord) {
 
@@ -269,30 +239,5 @@ public class ScoreService implements IScoreService {
             return new ResponseDto<>(false, e.getMessage(), null, HttpStatus.BAD_REQUEST);
         }
     }
-
-    /*public ResponseDto<WordScoreDto> calculateScore(String keyWord) {
-
-        try {
-            WordSuggestionsDto wordSuggestions = getWordSuggestions(keyWord).getData();
-
-            String foundWord = wordSuggestions.getSuggestions()
-                    .stream()
-                    .filter(keyWord::equals)
-                    .findAny()
-                    .orElse(null);
-
-            if (foundWord == null)
-                return new ResponseDto<>(new WordScoreDto(keyWord, 0));
-            else {
-
-                Integer foundWordIndex = wordSuggestions.getSuggestions().indexOf(foundWord);
-                return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 10 - foundWordIndex), HttpStatus.OK);
-            }
-
-        } catch (Exception e) {
-            return new ResponseDto<>(false, e.getMessage(), null, HttpStatus.BAD_REQUEST);
-        }
-    }*/
-
 
 }

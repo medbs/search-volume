@@ -9,6 +9,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import java.util.List;
 
 @Service
 public class ScoreService implements IScoreService {
+
+    Logger logger = LoggerFactory.getLogger(ScoreService.class);
 
     @Value("${amazon.api.url}")
     private String apiUrl;
@@ -91,9 +95,11 @@ public class ScoreService implements IScoreService {
         numberWordsWithHigherScore = numberWordsWithHigherScore + findNumberWordsWithHigherScore(keyWord, highSuggestions);
 
         //20 is a random number, it can be changed
-        while (numberWordsWithHigherScore < 10) {
+        while (numberWordsWithHigherScore < 50) {
             //get the top word that have the highest score
             String topWord = highSuggestions.get(0);
+
+            logger.info("top word: " + topWord);
 
             //get suggestions of the top word
             highSuggestions = getWordSuggestions(topWord).getData().getSuggestions();
@@ -118,10 +124,12 @@ public class ScoreService implements IScoreService {
         //count the number of words with lower score
         numberWordsWithLowerScore = numberWordsWithLowerScore + findNumberWordsWithLowerScore(keyWord, lowSuggestions);
 
-        while (numberWordsWithLowerScore < 10) {
+        while (numberWordsWithLowerScore < 50) {
 
             //get the bottom word that have the lowest score
-            String bottomWord = lowSuggestions.get(suggestions.size() - 1);
+            String bottomWord = lowSuggestions.get(lowSuggestions.size() - 1);
+
+            logger.info("bottom word: " + bottomWord);
 
             //get the suggestions of the bottom word
             lowSuggestions = getWordSuggestions(bottomWord).getData().getSuggestions();
@@ -131,7 +139,7 @@ public class ScoreService implements IScoreService {
                 break;
 
             //if the bottm word is also the bottm word in the returned structure, then there's no point to continue
-            if (0 == (findNumberWordsWithLowerScore(bottomWord, highSuggestions))) {
+            if (0 == (findNumberWordsWithLowerScore(bottomWord, lowSuggestions))) {
                 break;
             }
 

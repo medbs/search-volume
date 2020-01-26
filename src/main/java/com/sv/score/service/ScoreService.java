@@ -22,18 +22,21 @@ public class ScoreService implements IScoreService {
     @Value("${amazon.api.url}")
     private String apiUrl;
 
+    private int numberWordsWithHigherScore = 0;
+    private int numberWordsWithLowerScore = 0;
+
     @Override
     public ResponseDto<WordScoreDto> computeScore(String keyWord) {
 
         List<String> suggestions = getWordSuggestions(keyWord).getData().getSuggestions();
 
         if (!isWordExistsInStructure(keyWord, suggestions)) {
-            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 0), HttpStatus.OK);
+            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 0L), HttpStatus.OK);
         }
 
         if (isWordInTopStructure(keyWord, suggestions)) {
             // if numberWordsWithHigherScore = 0, the result will always be 100 when applying the score formula
-            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 100), HttpStatus.OK);
+            return new ResponseDto<>(true, "", new WordScoreDto(keyWord, 100L), HttpStatus.OK);
         }
 
         if (isWordInBottomStructure(keyWord, suggestions)) {
@@ -47,7 +50,7 @@ public class ScoreService implements IScoreService {
     }
 
 
-    private int scoreOfWordInBottom(String keyWord, List<String> suggestions) {
+    private float scoreOfWordInBottom(String keyWord, List<String> suggestions) {
 
         int numberWordsWithHigherScore = 0;
         List<String> highSuggestions = suggestions;
@@ -73,10 +76,9 @@ public class ScoreService implements IScoreService {
         return calculateScore(0, numberWordsWithHigherScore);
     }
 
-    private int scoreOfWordInBetween(String keyWord, List<String> suggestions) {
 
-        int numberWordsWithHigherScore = 0;
-        int numberWordsWithLowerScore = 0;
+    private float scoreOfWordInBetween(String keyWord, List<String> suggestions) {
+
 
         List<String> highSuggestions = suggestions;
         List<String> lowSuggestions = suggestions;
@@ -89,7 +91,7 @@ public class ScoreService implements IScoreService {
         numberWordsWithHigherScore = numberWordsWithHigherScore + findNumberWordsWithHigherScore(keyWord, highSuggestions);
 
         //20 is a random number, it can be changed
-        while (numberWordsWithHigherScore < 50) {
+        while (numberWordsWithHigherScore < 10) {
             //get the top word that have the highest score
             String topWord = highSuggestions.get(0);
 
@@ -99,6 +101,11 @@ public class ScoreService implements IScoreService {
             //if the top word is not in the returned structure,then exist loop
             if (!isWordExistsInStructure(topWord, highSuggestions))
                 break;
+
+            //if the top word is also the top word in the returned structure, then there's no point to continue
+            if (0 == (findNumberWordsWithHigherScore(topWord, highSuggestions))) {
+                break;
+            }
 
             //count number of words with higher score
             numberWordsWithHigherScore = numberWordsWithHigherScore + findNumberWordsWithHigherScore(topWord, highSuggestions);
@@ -111,7 +118,7 @@ public class ScoreService implements IScoreService {
         //count the number of words with lower score
         numberWordsWithLowerScore = numberWordsWithLowerScore + findNumberWordsWithLowerScore(keyWord, lowSuggestions);
 
-        while (numberWordsWithLowerScore < 50) {
+        while (numberWordsWithLowerScore < 10) {
 
             //get the bottom word that have the lowest score
             String bottomWord = lowSuggestions.get(suggestions.size() - 1);
@@ -122,6 +129,12 @@ public class ScoreService implements IScoreService {
             //if the bottom word is not in returned the returned structure, then exit loop
             if (!isWordExistsInStructure(bottomWord, lowSuggestions))
                 break;
+
+            //if the bottm word is also the bottm word in the returned structure, then there's no point to continue
+            if (0 == (findNumberWordsWithLowerScore(bottomWord, highSuggestions))) {
+                break;
+            }
+
             numberWordsWithLowerScore = numberWordsWithLowerScore + findNumberWordsWithLowerScore(bottomWord, lowSuggestions);
         }
 
@@ -204,9 +217,12 @@ public class ScoreService implements IScoreService {
      * @return the score
      */
 
-    private int calculateScore(int numberWordsWithLowerScore, int numberWordsWithHigherScore) {
+    private float calculateScore(int numberWordsWithLowerScore, int numberWordsWithHigherScore) {
+        int a = numberWordsWithLowerScore + 1;
+        int b = numberWordsWithLowerScore + numberWordsWithHigherScore + 1;
+        return Math.round(((float) a / b) * 100);
 
-        return ((numberWordsWithLowerScore + 1) / (numberWordsWithHigherScore + numberWordsWithLowerScore + 1)) * 100;
+        // return Math.round((float)((numberWordsWithLowerScore + 1) / (numberWordsWithHigherScore + numberWordsWithLowerScore + 1)) / 100);
     }
 
 

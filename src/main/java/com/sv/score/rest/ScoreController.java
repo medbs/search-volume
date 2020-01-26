@@ -19,7 +19,7 @@ public class ScoreController {
 
     @GetMapping(value = "")
     public ResponseEntity<ResponseDto<WordScoreDto>> submitNewProposal(@RequestParam String keyWord) {
-        
+
         ResponseDto<WordScoreDto> response = scoreService.computeScore(keyWord);
 
         return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());

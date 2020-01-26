@@ -7,12 +7,12 @@ public class WordScoreDto implements Serializable {
     private static final long serialVersionUID = 4073797816654019357L;
 
     private String keyWord;
-    private Integer score;
+    private float score;
 
     public WordScoreDto() {
     }
 
-    public WordScoreDto(String keyWord, Integer score) {
+    public WordScoreDto(String keyWord, float score) {
         this.keyWord = keyWord;
         this.score = score;
     }
@@ -29,11 +29,11 @@ public class WordScoreDto implements Serializable {
         this.keyWord = keyWord;
     }
 
-    public Integer getScore() {
+    public float getScore() {
         return score;
     }
 
-    public void setScore(Integer score) {
+    public void setScore(Long score) {
         this.score = score;
     }
 }

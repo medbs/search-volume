@@ -6,4 +6,5 @@ import com.sv.score.dto.WordScoreDto;
 public interface IScoreService {
 
     ResponseDto<WordScoreDto> computeScore(String keyWord);
+
 }

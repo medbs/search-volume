@@ -7,7 +7,7 @@
 ### Build the project
 
 ```
-mvn clean build
+mvn clean package
 ```
 
 ### Run the project as jar

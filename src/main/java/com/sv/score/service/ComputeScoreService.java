@@ -71,7 +71,7 @@ public class ComputeScoreService implements IScoreServiceV2 {
 
         }
 
-        logger.info("number of iterations" + removedLetters);
+        logger.info("number of iterations " + removedLetters);
         return new ResponseDto<>(new WordScoreDto(unModifiedKeyword, calculateScore(commonPrefixWords, unModifiedKeyword)));
 
     }

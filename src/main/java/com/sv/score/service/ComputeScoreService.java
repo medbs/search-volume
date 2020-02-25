@@ -1,9 +1,7 @@
 package com.sv.score.service;
 
 
-import com.sv.score.dto.GlobalWordSuggestionDto;
 import com.sv.score.dto.ResponseDto;
-import com.sv.score.dto.WordSuggestionV2Dto;
 import com.sv.score.dto.WordSuggestionsDto;
 import com.sv.score.interfaces.IScoreServiceV2;
 import org.apache.http.client.methods.HttpPost;
@@ -19,12 +17,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+
 
 @Service
 public class ComputeScoreService implements IScoreServiceV2 {
 
-    private Logger logger = LoggerFactory.getLogger(ScoreService.class);
+    private Logger logger = LoggerFactory.getLogger(ComputeScoreService.class);
 
     @Value("${amazon.api.url}")
     private String apiUrl;
@@ -35,7 +33,7 @@ public class ComputeScoreService implements IScoreServiceV2 {
         HashMap<String, Integer> commonPrefixWords = new HashMap<>();
         List<String> suggestions = getWordSuggestions(keyWord).getData().getSuggestions();
 
-        Integer removedLetters =0;
+        Integer removedLetters = 0;
 
         for (String suggestion : suggestions) {
             commonPrefixWords.put(suggestion, removedLetters);
@@ -60,74 +58,6 @@ public class ComputeScoreService implements IScoreServiceV2 {
 
         logger.info(String.valueOf(removedLetters));
         return new ResponseDto<>(commonPrefixWords);
-    }
-
-
-    public ResponseDto<Map<String, String>> computeScoreV2old(String keyWord) {
-
-        GlobalWordSuggestionDto globalWordSuggestionDto = new GlobalWordSuggestionDto();
-
-        HashMap<String, String> commonPrefixWords = new HashMap<>();
-
-        int call = 0;
-        while (keyWord.length() != 0) {
-            List<String> suggestions = getWordSuggestions(keyWord).getData().getSuggestions();
-
-
-            for (String suggestion : suggestions) {
-                WordSuggestionV2Dto wordSuggestionV2Dto = new WordSuggestionV2Dto();
-
-                if (!commonPrefixWords.containsKey(suggestion)) {
-                    commonPrefixWords.put(suggestion, keyWord);
-                }
-            }
-
-            /*for (int i = 0; i < suggestions.size(); i++) {
-                if (!commonPrefixWords.containsKey(suggestions.get(i))) {
-                    commonPrefixWords.put(suggestions.get(i), call);
-                }
-            }*/
-
-            call++;
-            /*suggestions.forEach(s -> {
-                if (!commonPrefixWords.containsKey(s)) {
-
-                    commonPrefixWords.put(s, 0);
-                }
-            });*/
-
-            keyWord = removeLetterFromKeyWord(keyWord);
-        }
-
-        //HashMap<String, Integer> sortedMap = sortByValue(commonPrefixWords);
-
-        return new ResponseDto<>(commonPrefixWords);
-    }
-
-
-    /**
-     * function to sort hashmap by values
-     */
-
-    private HashMap<String, Integer> sortByValue(HashMap<String, Integer> hm) {
-        // Create a list from elements of HashMap
-        List<Map.Entry<String, Integer>> list =
-                new LinkedList<Map.Entry<String, Integer>>(hm.entrySet());
-
-        // Sort the list
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-            public int compare(Map.Entry<String, Integer> o1,
-                               Map.Entry<String, Integer> o2) {
-                return (o1.getValue()).compareTo(o2.getValue());
-            }
-        });
-
-        // put data from sorted list to hashmap
-        HashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
-        for (Map.Entry<String, Integer> aa : list) {
-            temp.put(aa.getKey(), aa.getValue());
-        }
-        return temp;
     }
 
 

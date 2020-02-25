@@ -2,6 +2,7 @@ package com.sv.score.service;
 
 
 import com.sv.score.dto.ResponseDto;
+import com.sv.score.dto.WordScoreDto;
 import com.sv.score.dto.WordSuggestionsDto;
 import com.sv.score.interfaces.IScoreServiceV2;
 import org.apache.http.client.methods.HttpPost;
@@ -27,8 +28,15 @@ public class ComputeScoreService implements IScoreServiceV2 {
     @Value("${amazon.api.url}")
     private String apiUrl;
 
+
+    /**
+     * compute score
+     *
+     * @param keyWord string
+     * @return ResponseDto
+     */
     @Override
-    public ResponseDto<Map<String, Integer>> computeScoreV2(String keyWord) {
+    public ResponseDto<WordScoreDto> computeScore(String keyWord) {
 
         HashMap<String, Integer> commonPrefixWords = new HashMap<>();
         List<String> suggestions = getWordSuggestions(keyWord).getData().getSuggestions();
@@ -39,6 +47,10 @@ public class ComputeScoreService implements IScoreServiceV2 {
             commonPrefixWords.put(suggestion, removedLetters);
         }
 
+        //used to keep the original value of keyword,without removing chars, to be returned in method response
+        String unModifiedKeyword = keyWord;
+
+        //remove one letter for keyword
         keyWord = removeLetterFromKeyWord(keyWord);
         removedLetters++;
 
@@ -52,12 +64,16 @@ public class ComputeScoreService implements IScoreServiceV2 {
                 }
             }
 
+            logger.info("sSearched keyword after removal of 1 letter: " + keyWord);
+
             keyWord = removeLetterFromKeyWord(keyWord);
             removedLetters++;
+
         }
 
-        logger.info(String.valueOf(removedLetters));
-        return new ResponseDto<>(commonPrefixWords);
+        logger.info("number of iterations" + removedLetters);
+        return new ResponseDto<>(new WordScoreDto(unModifiedKeyword, calculateScore(commonPrefixWords, unModifiedKeyword)));
+
     }
 
 
@@ -96,19 +112,21 @@ public class ComputeScoreService implements IScoreServiceV2 {
     }
 
     /**
-     * @param word             ,string
-     * @param wordSuggestions, list of strings
-     * @return True of a word exists in the structure,false if not
+     * @param
+     * @param
+     * @return
      */
-    private Boolean isWordExistsInList(String word, List<String> wordSuggestions) {
+    private float calculateScore(Map<String, Integer> words, String keyWord) {
 
-        String foundWord = wordSuggestions
-                .stream()
-                .filter(word::equals)
-                .findAny()
-                .orElse(null);
+        Integer keywordScore = words.get(keyWord);
+        Integer lowestScore = Collections.min(words.values());
+        Integer highestScore = Collections.max(words.values());
 
-        return foundWord != null;
+        if (keywordScore == null) {
+            return Math.round(((float) lowestScore / highestScore) * 100);
+        }
+
+        return Math.round(((float) keywordScore / highestScore) * 100);
     }
 
 

@@ -21,9 +21,9 @@ public class ScoreController {
 
 
     @GetMapping(value = "")
-    public ResponseEntity<ResponseDto<Map<String, Integer>>> computeScore(@RequestParam String keyWord) {
+    public ResponseEntity<ResponseDto<WordScoreDto>> computeScore(@RequestParam String keyWord) {
 
-        ResponseDto<Map<String, Integer>> response = computeScoreService.computeScoreV2(keyWord);
+        ResponseDto<WordScoreDto> response = computeScoreService.computeScore(keyWord);
 
         return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
     }

@@ -112,9 +112,9 @@ public class ComputeScoreService implements IScoreServiceV2 {
     }
 
     /**
-     * @param
-     * @param
-     * @return
+     * @param words,  Map<String, Integer>
+     * @param keyWord string
+     * @return score float
      */
     private float calculateScore(Map<String, Integer> words, String keyWord) {
 
